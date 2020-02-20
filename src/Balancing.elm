@@ -57,26 +57,26 @@ main =
 update : Msg -> Model -> Model
 update msg model =
     let
-        ownPositionLeft : Float
-        ownPositionLeft =
-            (0 - model.rightPosition) * ourWeight / model.hisWeight
+        ownPositionLeft : Float -> Float
+        ownPositionLeft rightPosition =
+            (0 - rightPosition) * ourWeight / model.hisWeight
 
-        ownPositionRight : Float
-        ownPositionRight =
-            (0 - model.leftPosition) * model.hisWeight / ourWeight
+        ownPositionRight : Float -> Float
+        ownPositionRight leftPosition =
+            (0 - leftPosition) * ourWeight / model.hisWeight
     in
     case msg of
-        PositionRight position ->
+        PositionRight rightPosition ->
             { model
-                | rightPosition = position
-                , leftPosition = ownPositionLeft
+                | rightPosition = rightPosition
+                , leftPosition = ownPositionLeft rightPosition
                 , lastChanged = Right
             }
 
-        PositionLeft position ->
+        PositionLeft leftPosition ->
             { model
-                | leftPosition = position
-                , rightPosition = ownPositionRight
+                | leftPosition = leftPosition
+                , rightPosition = ownPositionRight leftPosition
                 , lastChanged = Left
             }
 
@@ -90,13 +90,13 @@ update msg model =
                 Left ->
                     { model
                         | hisWeight = stringToFloat hisWeight
-                        , rightPosition = ownPositionRight
+                        , rightPosition = ownPositionRight model.leftPosition
                     }
 
                 Right ->
                     { model
                         | hisWeight = stringToFloat hisWeight
-                        , leftPosition = ownPositionLeft
+                        , leftPosition = ownPositionLeft model.rightPosition
                     }
 
 
@@ -116,7 +116,7 @@ view model =
             , centerX
             , centerY
             ]
-            [ slider PositionLeft model.leftPosition True <| Just 0.1
+            [ slider PositionLeft model.leftPosition True <| Just 0.001
             , slider PositionRight model.rightPosition False Nothing
             ]
         , row [ centerX, spacing 100, centerY ]
